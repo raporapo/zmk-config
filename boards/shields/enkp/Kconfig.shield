@@ -1,0 +1,5 @@
+config SHIELD_ENKP_LEFT
+    def_bool $(shields_list_contains,enkp_left)
+
+config SHIELD_ENKP_RIGHT
+    def_bool $(shields_list_contains,enkp_right)
