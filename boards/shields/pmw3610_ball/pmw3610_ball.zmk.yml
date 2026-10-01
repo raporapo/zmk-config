@@ -1,0 +1,9 @@
+file_format: "1"
+id: pmw3610_ball
+name: PMW3610 Ball
+type: shield
+url: https://github.com/raporapo/zmk-config
+requires:
+  - seeed_xiao
+features:
+  - keys

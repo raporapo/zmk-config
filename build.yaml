@@ -18,3 +18,15 @@
 #     artifact-name: corne_left_with_studio
 #
 ---
+include:
+  # PMW3610 trackball test pod (XIAO nRF52840)
+  - board: seeeduino_xiao_ble
+    shield: pmw3610_ball
+  # same firmware with USB logging (read it with a serial monitor to debug the sensor)
+  - board: seeeduino_xiao_ble
+    shield: pmw3610_ball
+    snippet: zmk-usb-logging
+    cmake-args: -DCONFIG_PMW3610_LOG_LEVEL_DBG=y
+    artifact-name: pmw3610_ball_usb_logging
+  - board: seeeduino_xiao_ble
+    shield: settings_reset

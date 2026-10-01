@@ -1,0 +1,43 @@
+#include <behaviors.dtsi>
+#include <dt-bindings/zmk/keys.h>
+#include <dt-bindings/zmk/pointing.h>
+#include <dt-bindings/zmk/input_transform.h>
+#include <input/processors.dtsi>
+
+#define BASE   0
+#define SCROLL 1
+
+/* While layer SCROLL is active the ball scrolls instead of moving the cursor. */
+&trackball_listener {
+    scroller {
+        layers = <SCROLL>;
+        input-processors = <&zip_xy_to_scroll_mapper
+                            &zip_scroll_transform INPUT_TRANSFORM_Y_INVERT
+                            &zip_scroll_scaler 1 16>;
+    };
+};
+
+/ {
+    combos {
+        compatible = "zmk,combos";
+        bootloader {
+            timeout-ms = <100>;
+            key-positions = <0 1 2>;
+            bindings = <&bootloader>;
+        };
+    };
+
+    keymap {
+        compatible = "zmk,keymap";
+
+        base_layer {
+            display-name = "Base";
+            bindings = <&mkp LCLK  &mkp RCLK  &mo SCROLL>;
+        };
+
+        scroll_layer {
+            display-name = "Scroll";
+            bindings = <&mkp LCLK  &mkp RCLK  &trans>;
+        };
+    };
+};

@@ -1,0 +1,6 @@
+if SHIELD_PMW3610_BALL
+
+config ZMK_KEYBOARD_NAME
+    default "PMW3610 Ball"
+
+endif # SHIELD_PMW3610_BALL
