@@ -1,0 +1,60 @@
+/*
+ * pmw3610_ball + magnetic scroll ring (TMAG5273A1 on the ring-sector PCB, I2C address 0x35).
+ *
+ *   ring PCB pad       XIAO
+ *   3V3   -----------  3V3   (same pad as the PMW3610's VIN wire)
+ *   GND   -----------  GND
+ *   SDA   -----------  D9   P1.14
+ *   SCL   -----------  D8   P1.13
+ *   INT   -----------  D7   P1.12  (wakes the sensor from sleep; optional)
+ *
+ * The PMW3610 uses SPIM0, so the ring gets TWIM1 (instance 1 is free on the XIAO).
+ */
+
+#include "pmw3610_ball.dtsi"
+#include <zephyr/dt-bindings/i2c/i2c.h>
+
+&pinctrl {
+    i2c1_default: i2c1_default {
+        group1 {
+            psels = <NRF_PSEL(TWIM_SDA, 1, 14)>,
+                    <NRF_PSEL(TWIM_SCL, 1, 13)>;
+        };
+    };
+
+    i2c1_sleep: i2c1_sleep {
+        group1 {
+            psels = <NRF_PSEL(TWIM_SDA, 1, 14)>,
+                    <NRF_PSEL(TWIM_SCL, 1, 13)>;
+            low-power-enable;
+        };
+    };
+};
+
+&i2c1 {
+    status = "okay";
+    compatible = "nordic,nrf-twim";
+    pinctrl-0 = <&i2c1_default>;
+    pinctrl-1 = <&i2c1_sleep>;
+    pinctrl-names = "default", "sleep";
+    clock-frequency = <I2C_BITRATE_FAST>;
+
+    scroll_ring: scroll_ring@35 {
+        compatible = "raporapo,tmag5273-ring";
+        reg = <0x35>;
+        int-gpios = <&xiao_d 7 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+        pole-pairs = <12>;          /* 24 magnets, N/S alternating */
+        steps-per-rev = <60>;       /* one wheel step every 6 deg */
+        hysteresis-percent = <15>;
+        tangential-axis = <0>;      /* chip X runs along the ring (package long axis radial) */
+        tangential-gain-percent = <120>;
+        // invert;                  /* uncomment if the ring scrolls the wrong way */
+    };
+};
+
+/ {
+    scroll_ring_listener: scroll_ring_listener {
+        compatible = "zmk,input-listener";
+        device = <&scroll_ring>;
+    };
+};

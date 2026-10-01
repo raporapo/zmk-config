@@ -28,5 +28,13 @@ include:
     snippet: zmk-usb-logging
     cmake-args: -DCONFIG_PMW3610_LOG_LEVEL_DBG=y
     artifact-name: pmw3610_ball_usb_logging
+  # v2 pod: same + TMAG5273 magnetic scroll ring
+  - board: seeeduino_xiao_ble
+    shield: pmw3610_ball_ring
+  - board: seeeduino_xiao_ble
+    shield: pmw3610_ball_ring
+    snippet: zmk-usb-logging
+    cmake-args: -DCONFIG_PMW3610_LOG_LEVEL_DBG=y -DCONFIG_TMAG5273_RING_LOG_LEVEL_DBG=y
+    artifact-name: pmw3610_ball_ring_usb_logging
   - board: seeeduino_xiao_ble
     shield: settings_reset

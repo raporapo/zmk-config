@@ -1,2 +1,5 @@
 config SHIELD_PMW3610_BALL
     def_bool $(shields_list_contains,pmw3610_ball)
+
+config SHIELD_PMW3610_BALL_RING
+    def_bool $(shields_list_contains,pmw3610_ball_ring)

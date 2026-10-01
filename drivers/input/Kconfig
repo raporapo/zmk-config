@@ -1,0 +1,25 @@
+config TMAG5273_RING
+    bool "TMAG5273 magnetic scroll ring"
+    default y
+    depends on DT_HAS_RAPORAPO_TMAG5273_RING_ENABLED
+    depends on INPUT
+    select I2C
+    select GPIO
+    help
+      Scroll ring read by a TMAG5273 3D Hall sensor under a ring of alternating magnets.
+
+if TMAG5273_RING
+
+config TMAG5273_RING_THREAD_STACK_SIZE
+    int "Stack size of the sampling work queue"
+    default 1024
+
+config TMAG5273_RING_THREAD_PRIORITY
+    int "Priority of the sampling work queue"
+    default 10
+
+module = TMAG5273_RING
+module-str = tmag5273_ring
+source "subsys/logging/Kconfig.template.log_config"
+
+endif # TMAG5273_RING

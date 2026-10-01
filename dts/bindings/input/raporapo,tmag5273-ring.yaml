@@ -1,0 +1,79 @@
+description: |
+  TMAG5273 3D Hall sensor reading a ring of alternating magnets as a scroll wheel.
+  The field angle (tangential axis vs Z) turns 360 deg per pole pair; the driver reports
+  one step of `input-code` every 360 * pole-pairs / steps-per-rev degrees of field angle.
+
+compatible: "raporapo,tmag5273-ring"
+
+include: i2c-device.yaml
+
+properties:
+  int-gpios:
+    type: phandle-array
+    description: |
+      TMAG5273 INT pin (open drain, active low). The driver pulses it low to wake the sensor
+      from sleep before each sample. Without it, an I2C address wakes the sensor instead.
+
+  pole-pairs:
+    type: int
+    default: 12
+    description: Number of N/S magnet pairs around the ring (24 magnets = 12 pairs).
+
+  steps-per-rev:
+    type: int
+    default: 60
+    description: Scroll steps per ring revolution (60 = one step every 6 deg).
+
+  hysteresis-percent:
+    type: int
+    default: 15
+    description: Extra travel past half a step before a step is reported, in percent of a step.
+
+  tangential-axis:
+    type: int
+    default: 0
+    enum: [0, 1]
+    description: Sensor axis along the ring's travel (0 = X, 1 = Y). The other axis used is Z.
+
+  tangential-gain-percent:
+    type: int
+    default: 120
+    description: Scale for the tangential axis so both axes swing about equally (|Bz| / |Bt|).
+
+  conv-avg:
+    type: int
+    default: 0
+    enum: [0, 1, 2, 3, 4, 5]
+    description: CONV_AVG, 2^n samples averaged per conversion (0 = fastest, lowest power).
+
+  active-interval-ms:
+    type: int
+    default: 5
+    description: Sample period while the ring is moving.
+
+  idle-interval-ms:
+    type: int
+    default: 20
+    description: Sample period after idle-after-ms without movement.
+
+  rest-interval-ms:
+    type: int
+    default: 50
+    description: Sample period after rest-after-ms without movement.
+
+  idle-after-ms:
+    type: int
+    default: 500
+
+  rest-after-ms:
+    type: int
+    default: 30000
+
+  invert:
+    type: boolean
+    description: Reverse the scroll direction.
+
+  input-code:
+    type: int
+    default: 8
+    description: Relative input code to report (INPUT_REL_WHEEL = 8).

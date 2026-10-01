@@ -1,0 +1,18 @@
+#include "pmw3610_ball.keymap"
+
+/ {
+    /* the ring scrolls vertically; with the scroll layer held (D5) it scrolls sideways */
+    zip_wheel_to_hwheel: zip_wheel_to_hwheel {
+        compatible = "zmk,input-processor-code-mapper";
+        #input-processor-cells = <0>;
+        type = <INPUT_EV_REL>;
+        map = <INPUT_REL_WHEEL INPUT_REL_HWHEEL>;
+    };
+};
+
+&scroll_ring_listener {
+    hscroll {
+        layers = <SCROLL>;
+        input-processors = <&zip_wheel_to_hwheel>;
+    };
+};

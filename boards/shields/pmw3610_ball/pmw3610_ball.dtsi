@@ -1,0 +1,110 @@
+/*
+ * PMW3610 trackball test pod: XIAO nRF52840 + pmw3610-rev2.1 breakout, hand wired.
+ *
+ *   breakout J1        XIAO
+ *   1 VIN   ---------  3V3      (JP1 bridged 1-2: VDDIO = VIN = 3.3 V)
+ *   2 GND   ---------  GND
+ *   3 SDIO  ---------  D10  P1.15   (SPI MOSI and MISO on the same pin: 3-wire SPI)
+ *   4 SCLK  ---------  D2   P0.28
+ *   5 nCS   ---------  D1   P0.03
+ *   6 MOTION --------  D0   P0.02
+ *   7 nRESET           not connected (pulled up on the breakout, the driver resets over SPI)
+ *
+ * Optional buttons, each between the pin and GND: D3 left click, D4 right click,
+ * D5 hold = scroll. All three together = bootloader.
+ */
+
+#include <dt-bindings/zmk/matrix_transform.h>
+#include <physical_layouts.dtsi>
+#include <zephyr/dt-bindings/input/input-event-codes.h>
+
+/ {
+    chosen {
+        zmk,physical-layout = &pmw3610_ball_layout;
+    };
+
+    kscan0: kscan {
+        compatible = "zmk,kscan-gpio-direct";
+        wakeup-source;
+        input-gpios
+            = <&xiao_d 3 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>
+            , <&xiao_d 4 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>
+            , <&xiao_d 5 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>
+            ;
+    };
+
+    default_transform: matrix_transform {
+        compatible = "zmk,matrix-transform";
+        rows = <1>;
+        columns = <3>;
+        map = <RC(0,0) RC(0,1) RC(0,2)>;
+    };
+
+    pmw3610_ball_layout: physical_layout {
+        compatible = "zmk,physical-layout";
+        display-name = "PMW3610 Ball";
+        transform = <&default_transform>;
+        kscan = <&kscan0>;
+        keys  //                     w   h    x    y  rot  rx  ry
+            = <&key_physical_attrs 100 100    0    0    0   0   0>
+            , <&key_physical_attrs 100 100  100    0    0   0   0>
+            , <&key_physical_attrs 100 100  200    0    0   0   0>
+            ;
+    };
+
+    trackball_listener: trackball_listener {
+        compatible = "zmk,input-listener";
+        device = <&trackball>;
+    };
+};
+
+&pinctrl {
+    spi0_default: spi0_default {
+        group1 {
+            psels = <NRF_PSEL(SPIM_SCK, 0, 28)>,
+                    <NRF_PSEL(SPIM_MOSI, 1, 15)>,
+                    <NRF_PSEL(SPIM_MISO, 1, 15)>;
+        };
+    };
+
+    spi0_sleep: spi0_sleep {
+        group1 {
+            psels = <NRF_PSEL(SPIM_SCK, 0, 28)>,
+                    <NRF_PSEL(SPIM_MOSI, 1, 15)>,
+                    <NRF_PSEL(SPIM_MISO, 1, 15)>;
+            low-power-enable;
+        };
+    };
+};
+
+&spi0 {
+    status = "okay";
+    compatible = "nordic,nrf-spim";
+    pinctrl-0 = <&spi0_default>;
+    pinctrl-1 = <&spi0_sleep>;
+    pinctrl-names = "default", "sleep";
+    cs-gpios = <&xiao_d 1 GPIO_ACTIVE_LOW>;
+
+    trackball: trackball@0 {
+        status = "okay";
+        compatible = "pixart,pmw3610";
+        reg = <0>;
+        spi-max-frequency = <2000000>;
+        irq-gpios = <&xiao_d 0 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+        cpi = <800>;
+        evt-type = <INPUT_EV_REL>;
+        x-input-code = <INPUT_REL_X>;
+        y-input-code = <INPUT_REL_Y>;
+        force-awake;
+
+        /* The sensor looks up at the ball, so the axes depend on how the board sits in the pod.
+         * If the cursor moves the wrong way, toggle these three and rebuild:
+         *   left/right swapped with up/down -> swap-xy
+         *   left/right reversed             -> invert-x
+         *   up/down reversed                -> invert-y
+         */
+        // swap-xy;
+        // invert-x;
+        // invert-y;
+    };
+};
